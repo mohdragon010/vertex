@@ -124,3 +124,8 @@
     @apply bg-background text-foreground;
   }
 }
+@layer utilities {
+  .text-vertex-primary{
+    @apply text-[#6366F1]
+  }
+}
