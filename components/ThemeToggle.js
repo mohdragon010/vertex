@@ -28,7 +28,7 @@ export default function ThemeToggle() {
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="icon">{themes.find(t => t.name === theme)?.icon}</Button>
+                <Button variant="ghost" size="icon">{themes.find(t => t.name === theme)?.icon}</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent>
                 <DropdownMenuGroup>
