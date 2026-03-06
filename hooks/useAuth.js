@@ -1,9 +1,9 @@
 "use client";
 
-import { auth } from "@/lib/firebase";
+import { auth, db } from "@/lib/firebase";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { doc } from "firebase/firestore";
-import { useState } from "react";
+import { doc, getDoc } from "firebase/firestore";
+import { useState, useEffect } from "react";
 
 export default function useAuth() {
     const [user, setUser] = useState(null);
@@ -20,22 +20,22 @@ export default function useAuth() {
                 const userDocRef = doc(db, "users", currentUser.uid);
                 const userDocSnap = await getDoc(userDocRef);
                 if (userDocSnap.exists()) {
-                    setUserDoc({ id: userDocSnap.id, ...userDocSnap.data()});
+                    setUserDoc({ id: userDocSnap.id, ...userDocSnap.data() });
                     console.log("User document data:", userDocSnap.data());
                 }
             }
         })
         return () => unsubscribe();
-    });
+    }, []);
 
     const logout = async () => {
         try {
             await signOut(auth);
             console.log("User signed out successfully");
-        } catch(err) {
+        } catch (err) {
             console.log("Error signing out:", err);
         }
     };
 
-    return { user, userDoc, loading, logout};
+    return { user, userDoc, loading, logout };
 }

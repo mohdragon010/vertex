@@ -128,4 +128,7 @@
   .text-vertex-primary{
     @apply text-[#6366F1]
   }
+  .bg-vertex-primary {
+    @apply bg-[#6366F1]
+  }
 }

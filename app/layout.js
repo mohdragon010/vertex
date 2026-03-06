@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
-  title: "Vertext - team managment tool",
+  title: "Vertex - team managment tool",
   description: "",
 };
 
