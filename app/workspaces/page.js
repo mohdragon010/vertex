@@ -8,18 +8,20 @@ import { Plus, Layout, Grid, ArrowRight, Layers, PlusCircle, Sparkles } from "lu
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation"
 import Link from "next/link";
 
 
 export default function Workspaces() {
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
+    const router = useRouter()
     const [workspaces, setWorkspaces] = useState([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const getWorkspaces = async () => {
-            if (!user?.uid) {
-                return
+            if (!user?.uid && !authLoading) {
+                router.push("/login")
             }
             try {
                 setLoading(true);
