@@ -26,7 +26,7 @@ import { Spinner } from "@/components/ui/spinner"
 import useAuth from "@/hooks/useAuth"
 import { auth, db } from "@/lib/firebase"
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth"
-import { doc, serverTimestamp, setDoc } from "firebase/firestore"
+import { collection, doc, serverTimestamp, setDoc } from "firebase/firestore"
 import { AnimatePresence, motion } from "framer-motion"
 import { CheckCircle2, Eye, EyeOff, Lock, Mail, User } from "lucide-react"
 import Link from "next/link"
@@ -75,6 +75,16 @@ export function SignupForm() {
 
         setIsSigningUp(true);
         setIsLoading(true);
+        
+        const collectionRef = collection(db, "users");
+        const q = query(collectionRef, where("email", "==", formData.email));
+        const querySnap = await getDocs(q);
+        if(!querySnap.empty){
+            setError("Email already exists");
+            setIsSigningUp(false);
+            setIsLoading(false);
+            return;
+        }
         try {
             const cred = await createUserWithEmailAndPassword(auth, formData.email, formData.password);
             const userDocRef = doc(db, "users", cred.user.uid);

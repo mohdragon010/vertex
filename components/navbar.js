@@ -1,5 +1,5 @@
 "use client"
-import { useEffect, useState } from "react"
+import React, { useEffect, useState } from "react"
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from "./ui/breadcrumb";
 import { usePathname } from "next/navigation";
 import { LogOut, Menu, Settings, X } from "lucide-react";
@@ -62,15 +62,17 @@ export default function Navbar() {
                         <BreadcrumbList>
                             {pathArr.length > 0 && <BreadcrumbSeparator />}
                             {pathArr.map((item, index) => (
-                                <BreadcrumbItem key={index}>
-                                    <BreadcrumbLink
-                                        href={`/${pathArr.slice(0, index + 1).join("/")}`}
-                                        className="capitalize text-sm font-medium transition-colors hover:text-vertex-primary"
-                                    >
-                                        {item.replace(/-/g, ' ')}
-                                    </BreadcrumbLink>
+                                <React.Fragment key={index}>
+                                    <BreadcrumbItem>
+                                        <BreadcrumbLink
+                                            href={`/${pathArr.slice(0, index + 1).join("/")}`}
+                                            className="capitalize text-sm font-medium transition-colors hover:text-vertex-primary"
+                                            >
+                                            {item.replace(/-/g, ' ')}
+                                        </BreadcrumbLink>
+                                    </BreadcrumbItem>
                                     {index < pathArr.length - 1 && <BreadcrumbSeparator />}
-                                </BreadcrumbItem>
+                                </React.Fragment>
                             ))}
                         </BreadcrumbList>
                     </Breadcrumb>

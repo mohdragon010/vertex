@@ -16,8 +16,9 @@ import {
 import { Input } from "@/components/ui/input"
 import { Spinner } from "@/components/ui/spinner"
 import useAuth from "@/hooks/useAuth"
-import { auth } from "@/lib/firebase"
+import { auth, db } from "@/lib/firebase"
 import { signInWithEmailAndPassword } from "firebase/auth"
+import { collection, doc, getDocs, query } from "firebase/firestore"
 import { AnimatePresence, motion } from "framer-motion"
 import { Eye, EyeOff, Lock, Mail } from "lucide-react"
 import Link from "next/link"
@@ -25,7 +26,7 @@ import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 
 export function LoginForm() {
-    const { user, loading: authLoading } = useAuth()
+    const { user, loading: authLoading, logout } = useAuth()
     const router = useRouter()
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState("")
@@ -48,6 +49,19 @@ export function LoginForm() {
 
         if (!formData.email || !formData.password) {
             setError("Please fill in all fields");
+            return;
+        }
+
+        const usersCollectionRef = collection(db, "users")
+        const q = query(
+            usersCollectionRef,
+            where("email", "==", formData.email)
+        );
+        const userDoc = await getDocs(q);
+        if (userDoc.empty) {
+            setError("User not found");
+            logout();
+            setIsLoading(false)
             return;
         }
 

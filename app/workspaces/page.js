@@ -19,6 +19,7 @@ export default function Workspaces() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        if(!user?.uid) return
         const getWorkspaces = async () => {
             if (!user?.uid && !authLoading) {
                 router.push("/login")
@@ -26,7 +27,7 @@ export default function Workspaces() {
             try {
                 setLoading(true);
                 const collectionRef = collection(db, 'workspaces');
-                const q = query(collectionRef, where("members", "array-contains", user.uid));
+                const q = query(collectionRef, where("members", "array-contains", user?.uid));
                 const snap = await getDocs(q);
                 const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 setWorkspaces(data)
@@ -138,16 +139,12 @@ export default function Workspaces() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href="/workspaces/create" className="contents">
+                        <Link href="/workspaces/new" className="contents">
                             <Button className="bg-vertex-primary hover:bg-vertex-primary/90 text-primary-foreground h-14 px-8 rounded-2xl text-lg font-semibold shadow-xl shadow-vertex-primary/20 transition-all active:scale-[0.98] group">
                                 <PlusCircle className="mr-2 h-5 w-5 group-hover:rotate-90 transition-transform duration-300" />
                                 Create Workspace
                             </Button>
                         </Link>
-
-                        <Button variant="outline" className="h-14 px-8 rounded-2xl border-2 hover:bg-accent/50 text-lg font-medium transition-all">
-                            Explore Templates
-                        </Button>
                     </div>
                 </motion.div>
 
@@ -207,7 +204,7 @@ export default function Workspaces() {
                 >
                     {workspaces.map((workspace) => (
                         <motion.div key={workspace.id} variants={itemVariants}>
-                            <Link href={`/workspaces/${workspace.id}`} className="block h-full">
+                            <Link href={`/workspaces/${workspace.slug}`} className="block h-full">
                                 <Card className="group h-full border-2 border-transparent hover:border-vertex-primary/20 bg-card hover:shadow-2xl hover:shadow-vertex-primary/5 transition-all duration-500 rounded-[2rem] overflow-hidden flex flex-col">
                                     <CardHeader className="p-8">
                                         <div className="flex justify-between items-start mb-6">
