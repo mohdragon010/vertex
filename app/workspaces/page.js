@@ -19,7 +19,7 @@ export default function Workspaces() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if(!authLoading) return
+        if(authLoading) return
         const getWorkspaces = async () => {
             if (!user?.uid) {
                 router.push("/login")
