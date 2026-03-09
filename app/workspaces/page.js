@@ -19,9 +19,9 @@ export default function Workspaces() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if(!user?.uid) return
+        if(!authLoading) return
         const getWorkspaces = async () => {
-            if (!user?.uid && !authLoading) {
+            if (!user?.uid) {
                 router.push("/login")
             }
             try {
@@ -39,7 +39,7 @@ export default function Workspaces() {
         };
 
         getWorkspaces();
-    }, [user?.uid])
+    }, [user?.uid, authLoading])
 
     const containerVariants = {
         hidden: { opacity: 0 },
