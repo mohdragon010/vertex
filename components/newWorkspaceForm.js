@@ -20,9 +20,11 @@ import { Upload } from "lucide-react";
 import { addDoc, collection, getDocs, query, serverTimestamp, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import useAuth from "@/hooks/useAuth";
+import { useRouter } from "next/navigation";
 
 export default function NewWorkspaceForm() {
-    const { user, loading } = useAuth()
+    const { user } = useAuth()
+    const router = useRouter()
     const [workspaceFormData, setWorkspaceFormData] = useState({
         workspaceName: "",
         workspaceDescription: "",
@@ -75,6 +77,7 @@ export default function NewWorkspaceForm() {
                 slug:workspaceFormData.workspaceSlug,
                 members:[user?.uid],
                 adminId:user?.uid,
+                projects: [],
                 createdAt:serverTimestamp(),
                 updatedAt:serverTimestamp(),
             });
@@ -92,6 +95,7 @@ export default function NewWorkspaceForm() {
             setError(error?.message || "Something went wrong, please try again.");
         }finally {
             setIsSubmitting(false);
+            router.push("/workspaces")
         }
     };
 

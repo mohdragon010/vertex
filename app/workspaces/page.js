@@ -174,81 +174,99 @@ export default function Workspaces() {
         // workspaces cards
     } else {
         return (
-            <div className="container mx-auto px-6 py-12 max-w-7xl min-h-screen">
-                <motion.div
-                    initial={{ opacity: 0, y: -10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12"
-                >
-                    <div>
-                        <h1 className="text-5xl font-extrabold tracking-tighter mb-3 selection:bg-vertex-primary selection:text-white">
-                            Workspaces
-                        </h1>
-                        <p className="text-muted-foreground text-lg max-w-xl">
-                            Access and manage all your collaborative environments in one place.
-                        </p>
-                    </div>
-                    <Link href="/workspaces/create">
-                        <Button className="bg-vertex-primary hover:bg-vertex-primary/90 text-primary-foreground h-12 px-6 rounded-xl shadow-lg shadow-vertex-primary/10 font-bold active:scale-95 transition-all">
-                            <Plus className="mr-2 h-5 w-5" />
-                            New Workspace
-                        </Button>
-                    </Link>
-                </motion.div>
+                <div className="container mx-auto px-6 py-12 max-w-7xl min-h-screen">
+                    <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12"
+                    >
+                        <div>
+                            <h1 className="text-5xl font-extrabold tracking-tighter mb-3 selection:bg-vertex-primary selection:text-white">
+                                Workspaces
+                            </h1>
+                            <p className="text-muted-foreground text-lg max-w-xl">
+                                Access and manage all your collaborative environments in one place.
+                            </p>
+                        </div>
+                        <Link href="/workspaces/new">
+                            <Button className="bg-vertex-primary hover:bg-vertex-primary/90 text-primary-foreground h-12 px-6 rounded-xl shadow-lg shadow-vertex-primary/10 font-bold active:scale-95 transition-all">
+                                <Plus className="mr-2 h-5 w-5" />
+                                New Workspace
+                            </Button>
+                        </Link>
+                    </motion.div>
 
-                <motion.div
-                    variants={containerVariants}
-                    initial="hidden"
-                    animate="visible"
-                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
-                >
-                    {workspaces.map((workspace) => (
-                        <motion.div key={workspace.id} variants={itemVariants}>
-                            <Link href={`/workspaces/${workspace.slug}`} className="block h-full">
-                                <Card className="group h-full border-2 border-transparent hover:border-vertex-primary/20 bg-card hover:shadow-2xl hover:shadow-vertex-primary/5 transition-all duration-500 rounded-[2rem] overflow-hidden flex flex-col">
-                                    <CardHeader className="p-8">
-                                        <div className="flex justify-between items-start mb-6">
-                                            <div className="bg-vertex-primary/10 p-4 rounded-2xl group-hover:bg-vertex-primary group-hover:text-primary-foreground transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3 shadow-sm">
-                                                <Layout className="w-7 h-7" />
-                                            </div>
-                                            <div className="flex -space-x-3">
-                                                {[1, 2, 3].slice(0, workspace.members?.length || 0).map((i) => (
-                                                    <div key={i} className="w-10 h-10 rounded-full border-4 border-card bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground ring-1 ring-border shadow-md capitalize">
-                                                        {i === 1 ? user?.displayName?.charAt(0) || "U" : "U"}
+                    <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
+                    >
+                        {workspaces.map((workspace) => (
+                            <motion.div key={workspace.id} variants={itemVariants}>
+                                <Link href={`/workspaces/${workspace.slug}`} className="block h-full">
+                                    <Card className="group h-full border-2 border-transparent hover:border-vertex-primary/20 bg-card hover:shadow-2xl hover:shadow-vertex-primary/5 transition-all duration-500 rounded-[2rem] overflow-hidden flex flex-col">
+                                        <CardHeader className="p-8">
+                                            <div className="flex justify-between items-start mb-6">
+                                                {workspace.imageURL ? (
+                                                    <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-border/50 group-hover:border-vertex-primary transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3 shadow-md">
+                                                        <img 
+                                                            src={workspace.imageURL} 
+                                                            alt={workspace.name} 
+                                                            className="w-full h-full object-cover"
+                                                        />
                                                     </div>
-                                                ))}
-                                                {(workspace.members?.length || 0) > 3 && (
-                                                    <div className="w-10 h-10 rounded-full border-4 border-card bg-accent flex items-center justify-center text-xs font-bold ring-1 ring-border shadow-md">
-                                                        +{(workspace.members?.length || 0) - 3}
+                                                ) : (
+                                                    <div className="bg-vertex-primary/10 p-4 rounded-2xl group-hover:bg-vertex-primary group-hover:text-primary-foreground transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3 shadow-sm">
+                                                        <Layout className="w-7 h-7" />
                                                     </div>
                                                 )}
+                                                <div className="flex -space-x-3">
+                                                    {[1, 2, 3].slice(0, workspace.members?.length || 0).map((i) => (
+                                                        <div key={i} className="w-10 h-10 rounded-full border-4 border-card bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground ring-1 ring-border shadow-md capitalize">
+                                                            {i === 1 ? user?.displayName?.charAt(0) || "U" : "U"}
+                                                        </div>
+                                                    ))}
+                                                    {(workspace.members?.length || 0) > 3 && (
+                                                        <div className="w-10 h-10 rounded-full border-4 border-card bg-accent flex items-center justify-center text-xs font-bold ring-1 ring-border shadow-md">
+                                                            +{(workspace.members?.length || 0) - 3}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <CardTitle className="text-2xl font-bold tracking-tight group-hover:text-vertex-primary transition-colors duration-300">
+                                                    {workspace.name}
+                                                </CardTitle>
+                                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                                    <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-bold uppercase tracking-widest bg-muted/40 w-fit px-3 py-1 rounded-full border border-border/50">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                                                        Active
+                                                    </div>
+                                                    {workspace.projects && (
+                                                        <div className="flex items-center gap-2 text-[10px] text-vertex-primary font-bold uppercase tracking-widest bg-vertex-primary/10 w-fit px-3 py-1 rounded-full border border-vertex-primary/20">
+                                                            <Grid className="w-3 h-3" />
+                                                            {workspace.projects.length} {workspace.projects.length === 1 ? "Project" : "Projects"}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+                                            <p className="text-muted-foreground mt-4 line-clamp-2 text-base leading-relaxed">
+                                                {workspace.description || "Streamline your team's productivity with this workspace."}
+                                            </p>
+                                        </CardHeader>
+                                        <div className="mt-auto p-8 pt-0 flex items-center justify-between border-t border-border/10 bg-muted/5 group-hover:bg-vertex-primary/5 transition-colors">
+                                            <span className="text-sm font-semibold group-hover:text-vertex-primary transition-colors">View details</span>
+                                            <div className="p-2 rounded-full group-hover:bg-vertex-primary group-hover:text-primary-foreground transition-all duration-500 -translate-x-2 group-hover:translate-x-0">
+                                                <ArrowRight className="w-5 h-5" />
                                             </div>
                                         </div>
-                                        <div className="space-y-2">
-                                            <CardTitle className="text-2xl font-bold tracking-tight group-hover:text-vertex-primary transition-colors duration-300">
-                                                {workspace.name}
-                                            </CardTitle>
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground font-medium uppercase tracking-widest bg-muted/30 w-fit px-3 py-1 rounded-full">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-vertex-primary animate-pulse" />
-                                                Active Workspace
-                                            </div>
-                                        </div>
-                                        <p className="text-muted-foreground mt-4 line-clamp-2 text-base leading-relaxed">
-                                            {workspace.description || "Streamline your team's productivity with this workspace."}
-                                        </p>
-                                    </CardHeader>
-                                    <div className="mt-auto p-8 pt-0 flex items-center justify-between border-t border-border/10 bg-muted/5 group-hover:bg-vertex-primary/5 transition-colors">
-                                        <span className="text-sm font-semibold group-hover:text-vertex-primary transition-colors">View details</span>
-                                        <div className="p-2 rounded-full group-hover:bg-vertex-primary group-hover:text-primary-foreground transition-all duration-500 -translate-x-2 group-hover:translate-x-0">
-                                            <ArrowRight className="w-5 h-5" />
-                                        </div>
-                                    </div>
-                                </Card>
-                            </Link>
-                        </motion.div>
-                    ))}
-                </motion.div>
-            </div>
+                                    </Card>
+                                </Link>
+                            </motion.div>
+                        ))}
+                    </motion.div>
+                </div>
         )
     }
 }
