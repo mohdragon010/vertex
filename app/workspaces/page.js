@@ -1,7 +1,7 @@
 "use client"
 import useAuth from "@/hooks/useAuth"
 import { db } from "@/lib/firebase";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion";
 import { Plus, Layout, Grid, ArrowRight, Layers, PlusCircle, Sparkles } from "lucide-react";
@@ -19,26 +19,26 @@ export default function Workspaces() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if(authLoading) return
-        const getWorkspaces = async () => {
-            if (!user?.uid) {
-                router.push("/login")
-            }
-            try {
-                setLoading(true);
-                const collectionRef = collection(db, 'workspaces');
-                const q = query(collectionRef, where("members", "array-contains", user?.uid));
-                const snap = await getDocs(q);
-                const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setWorkspaces(data)
-            } catch (error) {
-                console.error("Error fetching workspaces:", error);
-            } finally {
-                setLoading(false);
-            }
-        };
+        if (authLoading) return;
+        if (!user?.uid) {
+            router.push("/login");
+            return;
+        }
 
-        getWorkspaces();
+        const collectionRef = collection(db, 'workspaces');
+        const q = query(collectionRef, where("members", "array-contains", user.uid));
+
+        setLoading(true);
+        const unsubscribe = onSnapshot(q, (snap) => {
+            const data = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setWorkspaces(data);
+            setLoading(false);
+        }, (error) => {
+            console.error("Error fetching workspaces:", error);
+            setLoading(false);
+        });
+
+        return () => unsubscribe();
     }, [user?.uid, authLoading])
 
     const containerVariants = {
@@ -224,7 +224,7 @@ export default function Workspaces() {
                                                 <div className="flex -space-x-3">
                                                     {[1, 2, 3].slice(0, workspace.members?.length || 0).map((i) => (
                                                         <div key={i} className="w-10 h-10 rounded-full border-4 border-card bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground ring-1 ring-border shadow-md capitalize">
-                                                            {i === 1 ? user?.displayName?.charAt(0) || "U" : "U"}
+                                                            {i === 1 ? user?.name?.charAt(0) || "U" : "U"}
                                                         </div>
                                                     ))}
                                                     {(workspace.members?.length || 0) > 3 && (
