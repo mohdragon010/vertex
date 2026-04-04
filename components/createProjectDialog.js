@@ -9,7 +9,8 @@ import useAuth from "@/hooks/useAuth"
 import { Label } from "./ui/label"
 import { Input } from "./ui/input"
 import { Textarea } from "./ui/textarea"
-import { Select ,SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select"
+import { Select ,SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
+import { v4 } from "uuid"
 
 export default function CreateProjectDialog({ open, setOpen, workspaceId, onProjectCreated }) {
     const { user, loading: authLoading } = useAuth()
@@ -21,7 +22,6 @@ export default function CreateProjectDialog({ open, setOpen, workspaceId, onProj
         color: "#6366F1",
         deadline: "",
         status: "active",
-        tasks: [],
     })
 
     const createProject = async () => {
@@ -37,10 +37,11 @@ export default function CreateProjectDialog({ open, setOpen, workspaceId, onProj
             const docRef = doc(db, "workspaces", workspaceId)
             const newProject = {
                 ...formData,
-                id: Math.random().toString(36).substr(2, 9) + Date.now().toString(36),
                 createdBy: user?.uid,
+                tasks: [],
+                id: v4(),
                 createdAt: Timestamp.now(),
-                updatedAt: Timestamp.now()
+                updatedAt: Timestamp.now(),
             }
 
             await updateDoc(docRef, {

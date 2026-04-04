@@ -10,7 +10,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation"
 import Link from "next/link";
-
+import WorkspaceMembersAvatars from "@/components/workspaceMembersAvatars";
 
 export default function Workspaces() {
     const { user, loading: authLoading } = useAuth();
@@ -117,7 +117,7 @@ export default function Workspaces() {
 
                         {/* Decorative elements */}
                         <div className="absolute -top-4 -right-4 bg-vertex-primary/20 w-12 h-12 rounded-full blur-xl" />
-                        <div className="absolute -bottom-4 -left-4 bg-purple-500/20 w-16 h-16 rounded-full blur-xl" />
+                        <div className="absolute -bottom-4 -left-4 bg-vertex-primary/20 w-16 h-16 rounded-full blur-xl" />
                     </div>
 
                     {/* Animated rings around the icon */}
@@ -221,18 +221,7 @@ export default function Workspaces() {
                                                         <Layout className="w-7 h-7" />
                                                     </div>
                                                 )}
-                                                <div className="flex -space-x-3">
-                                                    {[1, 2, 3].slice(0, workspace.members?.length || 0).map((i) => (
-                                                        <div key={i} className="w-10 h-10 rounded-full border-4 border-card bg-muted flex items-center justify-center text-xs font-bold text-muted-foreground ring-1 ring-border shadow-md capitalize">
-                                                            {i === 1 ? user?.name?.charAt(0) || "U" : "U"}
-                                                        </div>
-                                                    ))}
-                                                    {(workspace.members?.length || 0) > 3 && (
-                                                        <div className="w-10 h-10 rounded-full border-4 border-card bg-accent flex items-center justify-center text-xs font-bold ring-1 ring-border shadow-md">
-                                                            +{(workspace.members?.length || 0) - 3}
-                                                        </div>
-                                                    )}
-                                                </div>
+                                                <WorkspaceMembersAvatars members={workspace.members} />
                                             </div>
                                             <div className="space-y-2">
                                                 <CardTitle className="text-2xl font-bold tracking-tight group-hover:text-vertex-primary transition-colors duration-300">

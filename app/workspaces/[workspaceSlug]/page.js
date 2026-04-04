@@ -6,10 +6,11 @@ import { collection, onSnapshot, query, where } from "firebase/firestore"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Layout, Grid, Users, Calendar, ArrowLeft, Plus, Sparkles, MoreVertical, Edit, Trash2 } from "lucide-react"
+import { Layout, Grid, Users, Calendar, ArrowLeft, Plus, Sparkles, MoreVertical, Edit, Trash2, Settings } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
+import WorkspaceMembersDropdownWrapper from "@/components/workspaceMembersDropdownWrapper"
 import CreateProjectDialog from "@/components/createProjectDialog"
 import EditProjectDialog from "@/components/editProjectDialog"
 import DeleteProjectDialog from "@/components/deleteProjectDialog"
@@ -150,19 +151,29 @@ export default function WorkspacePage() {
                             <div className="flex flex-wrap justify-center lg:justify-start gap-6">
                                 {[
                                     { icon: Grid, label: "Projects", value: workspace.projects?.length || 0, color: "vertex-primary" },
-                                    { icon: Users, label: "Members", value: workspace.members?.length || 0, color: "purple-500" },
+                                    { icon: Users, label: "Members", value: workspace.members?.length || 0, color: "vertex-primary" },
                                     { icon: Calendar, label: "Status", value: "Ready", color: "blue-500" }
-                                ].map((stat, i) => (
-                                    <div key={i} className="flex items-center gap-4 bg-card/40 backdrop-blur-md border border-border/40 p-5 rounded-3xl shadow-sm min-w-40 hover:border-vertex-primary/30 transition-colors group/stat">
-                                        <div className={`p-2.5 bg-${stat.color || 'vertex-primary'}/10 rounded-2xl text-${stat.color || 'vertex-primary'} group-hover/stat:scale-110 transition-transform`}>
-                                            <stat.icon className="w-6 h-6" />
+                                ].map((stat, i) => {
+                                    const StatCard = (
+                                        <div key={i} className="flex items-center gap-4 bg-card/40 backdrop-blur-md border border-border/40 p-5 rounded-3xl shadow-sm min-w-40 hover:border-vertex-primary/30 transition-colors group/stat">
+                                            <div className={`p-2.5 bg-${stat.color || 'vertex-primary'}/10 rounded-2xl text-${stat.color || 'vertex-primary'} group-hover/stat:scale-110 transition-transform`}>
+                                                <stat.icon className="w-6 h-6" />
+                                            </div>
+                                            <div>
+                                                <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1.5">{stat.label}</p>
+                                                <p className="text-2xl font-black tracking-tight leading-none">{stat.value}</p>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest leading-none mb-1.5">{stat.label}</p>
-                                            <p className="text-2xl font-black tracking-tight leading-none">{stat.value}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                                    )
+                                    if (stat.label === "Members") {
+                                        return (
+                                            <WorkspaceMembersDropdownWrapper key={i} members={workspace.members}>
+                                                {StatCard}
+                                            </WorkspaceMembersDropdownWrapper>
+                                        )
+                                    }
+                                    return StatCard
+                                })}
                             </div>
                         </motion.div>
                     </div>
@@ -171,8 +182,23 @@ export default function WorkspacePage() {
                         initial={{ opacity: 0, scale: 0.95 }}
                         animate={{ opacity: 1, scale: 1 }}
                         transition={{ delay: 0.3 }}
-                        className="shrink-0"
+                        className="shrink-0 flex items-center gap-4"
                     >
+                        {workspace.adminId === user?.uid && (
+                            <>
+                                <Link href={`/workspaces/${workspace.slug}/settings`}>
+                                    <Button variant="outline" size="icon" className="rounded-2xl h-14 w-14 border-2 hover:bg-muted/50 transition-all active:scale-95 group" title="Workspace Settings">
+                                        <Settings className="h-6 w-6 group-hover:rotate-45 transition-transform duration-300 text-vertex-primary" />
+                                    </Button>
+                                </Link>
+                                <Link href={`/workspaces/${workspace.slug}/members`}>
+                                    <Button variant="outline" className="rounded-2xl h-14 px-8 font-black text-lg border-2 hover:bg-muted/50 transition-all active:scale-95 group">
+                                        <Users className="mr-2 h-6 w-6 group-hover:scale-110 transition-transform duration-300 text-vertex-primary" />
+                                        Manage Members
+                                    </Button>
+                                </Link>
+                            </>
+                        )}
                         <Button className="bg-vertex-primary hover:bg-vertex-primary/90 text-primary-foreground rounded-2xl h-14 px-8 font-black text-lg shadow-xl shadow-vertex-primary/20 transition-all active:scale-95 group" onClick={() => { setCreateProjectDialogOpen(true) }}>
                             <Plus className="mr-2 h-6 w-6 group-hover:rotate-90 transition-transform duration-300" />
                             Create Project
@@ -215,68 +241,70 @@ export default function WorkspacePage() {
                                     transition={{ delay: idx * 0.1 }}
                                     className="group/proj"
                                 >
-                                    <div className="bg-card border border-border/50 rounded-[2.5rem] p-8 h-full hover:shadow-2xl hover:shadow-vertex-primary/5 hover:border-vertex-primary/20 transition-all duration-500 cursor-pointer flex flex-col relative">
-                                        <div className="absolute top-6 right-6">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                                                    <Button variant="ghost" className="h-10 w-10 p-0 rounded-xl hover:bg-muted/50 border-0">
-                                                        <MoreVertical className="h-5 w-5 text-muted-foreground" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end" className="rounded-2xl border-border bg-card/95 backdrop-blur-md p-2 min-w-40 shadow-2xl">
-                                                    <DropdownMenuItem 
-                                                        className="rounded-xl flex items-center gap-3 p-3 focus:bg-vertex-primary/10 focus:text-vertex-primary cursor-pointer font-bold"
-                                                        onClick={(e) => handleEditProject(e, project)}
-                                                    >
-                                                        <Edit className="w-4 h-4" />
-                                                        Edit Project
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem 
-                                                        className="rounded-xl flex items-center gap-3 p-3 focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold"
-                                                        onClick={(e) => handleDeleteProject(e, project)}
-                                                    >
-                                                        <Trash2 className="w-4 h-4" />
-                                                        Delete Project
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div>
+                                    <Link href={`/workspaces/${param.workspaceSlug}/${project.id}`}>
+                                        <div className="bg-card border border-border/50 rounded-[2.5rem] p-8 h-full hover:shadow-2xl hover:shadow-vertex-primary/5 hover:border-vertex-primary/20 transition-all duration-500 cursor-pointer flex flex-col relative">
+                                            <div className="absolute top-6 right-6">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                                        <Button variant="ghost" className="h-10 w-10 p-0 rounded-xl hover:bg-muted/50 border-0">
+                                                            <MoreVertical className="h-5 w-5 text-muted-foreground" />
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end" className="rounded-2xl border-border bg-card/95 backdrop-blur-md p-2 min-w-40 shadow-2xl">
+                                                        <DropdownMenuItem 
+                                                            className="rounded-xl flex items-center gap-3 p-3 focus:bg-vertex-primary/10 focus:text-vertex-primary cursor-pointer font-bold"
+                                                            onClick={(e) => handleEditProject(e, project)}
+                                                        >
+                                                            <Edit className="w-4 h-4" />
+                                                            Edit Project
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem 
+                                                            className="rounded-xl flex items-center gap-3 p-3 focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold"
+                                                            onClick={(e) => handleDeleteProject(e, project)}
+                                                        >
+                                                            <Trash2 className="w-4 h-4" />
+                                                            Delete Project
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
 
-                                        <div className="flex justify-between items-start mb-6 pr-10">
-                                            <div 
-                                                className="p-4 rounded-2xl transition-all duration-500 group-hover/proj:scale-110 group-hover/proj:rotate-3"
-                                                style={{ backgroundColor: `${project.color}20`, color: project.color }}
-                                            >
-                                                <Grid className="w-7 h-7" />
+                                            <div className="flex justify-between items-start mb-6 pr-10">
+                                                <div 
+                                                    className="p-4 rounded-2xl transition-all duration-500 group-hover/proj:scale-110 group-hover/proj:rotate-3"
+                                                    style={{ backgroundColor: `${project.color}20`, color: project.color }}
+                                                >
+                                                    <Grid className="w-7 h-7" />
+                                                </div>
+                                                <div 
+                                                    className="text-[10px] font-black uppercase px-3 py-1.5 rounded-full border"
+                                                    style={{ 
+                                                        backgroundColor: project.status === 'active' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
+                                                        color: project.status === 'active' ? '#10B981' : '#6B7280',
+                                                        borderColor: project.status === 'active' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(107, 114, 128, 0.2)'
+                                                    }}
+                                                >
+                                                    {project.status || 'Active'}
+                                                </div>
                                             </div>
-                                            <div 
-                                                className="text-[10px] font-black uppercase px-3 py-1.5 rounded-full border"
-                                                style={{ 
-                                                    backgroundColor: project.status === 'active' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
-                                                    color: project.status === 'active' ? '#10B981' : '#6B7280',
-                                                    borderColor: project.status === 'active' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(107, 114, 128, 0.2)'
-                                                }}
-                                            >
-                                                {project.status || 'Active'}
+                                            <h3 className="text-2xl font-black mb-2 group-hover/proj:text-vertex-primary transition-colors" style={{ color: project.color }}>
+                                                {project.title}
+                                            </h3>
+                                            <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed mb-6">
+                                                {project.description || "No description provided for this project."}
+                                            </p>
+                                            
+                                            <div className="mt-auto flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
+                                                <span>{project.tasks?.length || 0} Tasks</span>
+                                                {project.deadline && (
+                                                    <span className="flex items-center gap-1">
+                                                        <Calendar className="w-3 h-3" />
+                                                        {new Date(project.deadline).toLocaleDateString()}
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
-                                        <h3 className="text-2xl font-black mb-2 group-hover/proj:text-vertex-primary transition-colors" style={{ color: project.color }}>
-                                            {project.title}
-                                        </h3>
-                                        <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed mb-6">
-                                            {project.description || "No description provided for this project."}
-                                        </p>
-                                        
-                                        <div className="mt-auto flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
-                                            <span>{project.tasks?.length || 0} Tasks</span>
-                                            {project.deadline && (
-                                                <span className="flex items-center gap-1">
-                                                    <Calendar className="w-3 h-3" />
-                                                    {new Date(project.deadline).toLocaleDateString()}
-                                                </span>
-                                            )}
-                                        </div>
-                                    </div>
+                                    </Link>
                                 </motion.div>
                             ))}
                         </div>

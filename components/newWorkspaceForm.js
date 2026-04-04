@@ -11,12 +11,13 @@ import {
 } from "@/components/ui/card";
 import {
     Field,
+    FieldError,
     FieldGroup,
     FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { Spinner } from "@/components/ui/spinner";
-import { Upload } from "lucide-react";
+import { AlertCircle, Upload } from "lucide-react";
 import { addDoc, collection, getDocs, query, serverTimestamp, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import useAuth from "@/hooks/useAuth";
@@ -91,11 +92,12 @@ export default function NewWorkspaceForm() {
             })
             setSelectedFile(null);
             setPreviewURL(null)
+            router.push("/workspaces")
         } catch(error){
             setError(error?.message || "Something went wrong, please try again.");
         }finally {
             setIsSubmitting(false);
-            router.push("/workspaces")
+            console.log(error)
         }
     };
 
@@ -103,7 +105,7 @@ export default function NewWorkspaceForm() {
         <div className="flex flex-col gap-6 max-w-2xl mx-auto py-10">
             <Card className="border-border/60 shadow-lg">
                 <CardHeader className="text-center">
-                    <CardTitle className="text-3xl font-bold tracking-tight bg-linear-to-r from-indigo-500 to-purple-600 bg-clip-text text-transparent">
+                    <CardTitle className="text-3xl font-bold tracking-tight text-vertex-primary">
                         Create Workspace
                     </CardTitle>
                     <CardDescription>
@@ -114,6 +116,12 @@ export default function NewWorkspaceForm() {
                     <form onSubmit={handleCreateNewWorkSpace}>
                         <FieldGroup className="space-y-6">
                             <Field>
+                                    {error && (<div className="w-full flex justify-center animate-in fade-in slide-in-from-top-2 duration-300">
+                                        <FieldError className="flex items-center gap-2 px-4 py-2 rounded-md bg-red-500/10 border border-red-500/20 text-red-400 text-sm font-medium shadow-[0_0_20px_rgba(239,68,68,0.1)]">
+                                            <AlertCircle />
+                                            {error}
+                                        </FieldError>
+                                    </div> )}
                                 <FieldLabel htmlFor="workspaceName">Workspace Name</FieldLabel>
                                 <Input
                                     id="workspaceName"

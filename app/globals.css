@@ -131,4 +131,17 @@
   .bg-vertex-primary {
     @apply bg-[#6366F1]
   }
+  .ring-vertex-primary {
+    @apply ring-[#6366F1]
+  }
+  .border-vertex-primary {
+    @apply border-[#6366F1]
+  }
+  .hover\:text-vertex-primary {
+    &:hover {
+      @media (hover: hover) {
+         color: #6366f1; /* Also fixed the truncated hex code here */
+      }
+    }
+  }
 }
