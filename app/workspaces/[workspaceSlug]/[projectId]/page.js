@@ -8,7 +8,8 @@ import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
-import CreateTaskDialog from "@/components/createTaskDialog";
+import dynamic from "next/dynamic";
+const CreateTaskDialog = dynamic(() => import("@/components/createTaskDialog"), { ssr: false });
 
 export default function Page() {
     const { workspaceSlug, projectId } = useParams();
@@ -49,8 +50,21 @@ export default function Page() {
 
     if (loading || authLoading) {
         return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="w-5 h-5 border-2 border-vertex-primary border-t-transparent rounded-full animate-spin" />
+            <div className="container mx-auto px-6 py-10 max-w-7xl min-h-screen">
+                <div className="mb-6 h-6 w-32 bg-muted animate-pulse rounded" />
+                <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-5 items-start">
+                    <div className="flex flex-col gap-5">
+                        <div className="h-48 w-full bg-card border border-border/50 rounded-xl p-6 flex flex-col justify-center">
+                            <h1 className="text-xl font-semibold text-muted-foreground animate-pulse mb-2">Loading Project Details...</h1>
+                            <div className="h-4 w-3/4 bg-muted animate-pulse rounded mt-4" />
+                        </div>
+                        <div className="h-64 w-full bg-card border border-border/50 rounded-xl animate-pulse" />
+                    </div>
+                    <div className="flex flex-col gap-4">
+                        <div className="h-40 w-full bg-card border border-border/50 rounded-xl animate-pulse" />
+                        <div className="h-32 w-full bg-card border border-border/50 rounded-xl animate-pulse" />
+                    </div>
+                </div>
             </div>
         )
     }
@@ -105,7 +119,7 @@ export default function Page() {
         <div className="container mx-auto px-6 py-10 max-w-7xl min-h-screen">
 
             {/* Back link */}
-            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="mb-6">
+            <motion.div initial={{ opacity: 1, x: -10 }} animate={{ opacity: 1, x: 0 }} className="mb-6">
                 <Link href={`/workspaces/${workspaceSlug}`} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-vertex-primary transition-colors group">
                     <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                     Back to workspace
@@ -119,7 +133,7 @@ export default function Page() {
 
                     {/* Project header card */}
                     <motion.div
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={{ opacity: 1, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.05 }}
                         className="bg-card border border-border/50 rounded-xl overflow-hidden"
@@ -170,7 +184,7 @@ export default function Page() {
                     {/* Tasks card */}
                     {!project.tasks.length && (
                         <motion.div
-                            initial={{ opacity: 0, y: 12 }}
+                            initial={{ opacity: 1, y: 12 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
                             className="bg-card border border-border/50 rounded-xl overflow-hidden"
@@ -205,7 +219,7 @@ export default function Page() {
 
                     {/* Details */}
                     <motion.div
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={{ opacity: 1, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.15 }}
                         className="bg-card border border-border/50 rounded-xl p-5"
@@ -231,7 +245,7 @@ export default function Page() {
 
                     {/* Progress */}
                     <motion.div
-                        initial={{ opacity: 0, y: 12 }}
+                        initial={{ opacity: 1, y: 12 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: 0.2 }}
                         className="bg-card border border-border/50 rounded-xl p-5"

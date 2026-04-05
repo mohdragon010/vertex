@@ -47,13 +47,13 @@ export default function Workspaces() {
         visible: {
             opacity: 1,
             transition: {
-                staggerChildren: 0.1
+                staggerChildren: 0.05
             }
         }
     };
 
     const itemVariants = {
-        hidden: { y: 20, opacity: 0 },
+        hidden: { y: 10, opacity: 0.5 },
         visible: {
             y: 0,
             opacity: 1,
@@ -68,13 +68,24 @@ export default function Workspaces() {
     if (loading) {
         return (
             <div className="container mx-auto px-6 py-12 max-w-7xl">
-                <div className="flex justify-between items-end mb-10">
-                    <div className="space-y-4">
-                        <Skeleton className="h-10 w-64" />
-                        <Skeleton className="h-4 w-96" />
-                    </div>
-                    <Skeleton className="h-11 w-40 rounded-xl" />
-                </div>
+                    <motion.div
+                        initial={{ y: -10 }}
+                        animate={{ y: 0 }}
+                        className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12"
+                    >
+                        <div>
+                            <h1 className="text-5xl font-extrabold tracking-tighter mb-3 selection:bg-vertex-primary selection:text-white">
+                                Workspaces
+                            </h1>
+                            <p className="text-muted-foreground text-lg max-w-xl">
+                                Access and manage all your collaborative environments in one place.
+                            </p>
+                        </div>
+                        <Button disabled className="bg-vertex-primary/50 text-primary-foreground h-12 px-6 rounded-xl font-bold">
+                            <Plus className="mr-2 h-5 w-5" />
+                            New Workspace
+                        </Button>
+                    </motion.div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {[1, 2, 3, 4, 5, 6].map(i => (
                         <div key={i} className="h-72 w-full bg-card/50 border border-border rounded-[2rem] p-8 space-y-6">
@@ -177,8 +188,8 @@ export default function Workspaces() {
         return (
                 <div className="container mx-auto px-6 py-12 max-w-7xl min-h-screen">
                     <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
+                        initial={{ y: -10 }}
+                        animate={{ y: 0 }}
                         className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12"
                     >
                         <div>
@@ -203,7 +214,7 @@ export default function Workspaces() {
                         animate="visible"
                         className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"
                     >
-                        {workspaces.map((workspace) => (
+                        {workspaces.map((workspace, index) => (
                             <motion.div key={workspace.id} variants={itemVariants}>
                                 <Link href={`/workspaces/${workspace.slug}`} className="block h-full">
                                     <Card className="group h-full border-2 border-transparent hover:border-vertex-primary/20 bg-card hover:shadow-2xl hover:shadow-vertex-primary/5 transition-all duration-500 rounded-[2rem] overflow-hidden flex flex-col">
@@ -217,6 +228,7 @@ export default function Workspaces() {
                                                             src={workspace.imageURL} 
                                                             alt={workspace.name} 
                                                             className="object-cover"
+                                                            priority={index < 3}
                                                         />
                                                     </div>
                                                 ) : (
