@@ -2,12 +2,13 @@
 
 import { useParams } from "next/navigation";
 import { motion } from "framer-motion"
-import { ArrowLeft, Calendar, Clock, FileText, Loader2 } from "lucide-react";
+import { ArrowLeft, Calendar, CheckSquare, Circle, Clock, Plus } from "lucide-react";
 import Link from "next/link";
 import useAuth from "@/hooks/useAuth";
 import { useEffect, useState } from "react";
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import CreateTaskDialog from "@/components/createTaskDialog";
 
 export default function Page() {
     const { workspaceSlug, projectId } = useParams();
@@ -17,18 +18,14 @@ export default function Page() {
     const [workspace, setWorkspace] = useState(null);
     const [error, setError] = useState(null)
 
-
     useEffect(() => {
         const getProject = async () => {
-            try{
+            try {
                 const workspaceCollectionRef = collection(db, "workspaces");
                 const q = query(workspaceCollectionRef, where("slug", "==", workspaceSlug));
-
-
                 setLoading(true)
-
                 const unsubscribe = onSnapshot(q, querySnapshot => {
-                    if(!querySnapshot.empty){
+                    if (!querySnapshot.empty) {
                         const wsData = querySnapshot.docs[0].data();
                         setWorkspace(wsData);
                         const projects = wsData.projects || [];
@@ -43,7 +40,7 @@ export default function Page() {
                     setError("Something went wrong, check the console for more details")
                 })
                 return () => unsubscribe();
-            }catch(err) {
+            } catch (err) {
                 console.log(err)
             }
         };
@@ -52,18 +49,18 @@ export default function Page() {
 
     if (loading || authLoading) {
         return (
-            <div className="container mx-auto px-6 py-12 max-w-7xl min-h-screen flex items-center justify-center">
-                <Loader2 className="w-10 h-10 text-vertex-primary animate-spin" />
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="w-5 h-5 border-2 border-vertex-primary border-t-transparent rounded-full animate-spin" />
             </div>
         )
     }
 
     if (!user) {
         return (
-            <div className="container mx-auto px-6 py-12 max-w-7xl min-h-[70vh] flex flex-col items-center justify-center text-center">
-                <h2 className="text-3xl font-bold mb-4 text-foreground">Authentication Required</h2>
-                <p className="text-muted-foreground mb-8 max-w-md text-lg">You need to be logged in to view this project.</p>
-                <Link href={`/login`} className="bg-vertex-primary text-primary-foreground px-8 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity">
+            <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6">
+                <h2 className="text-2xl font-semibold mb-3 text-foreground">Authentication Required</h2>
+                <p className="text-muted-foreground mb-6 max-w-sm">You need to be logged in to view this project.</p>
+                <Link href="/login" className="bg-vertex-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
                     Log In
                 </Link>
             </div>
@@ -72,12 +69,18 @@ export default function Page() {
 
     const isMember = workspace?.members?.includes(user.uid) || workspace?.adminId === user.uid;
 
+    const statusStyles={
+        active: "text-green-500 fill-green-500",
+        archived: "text-gray-400 opacity-60",
+        completed: "text-blue-500 fill-blue-500"
+    }
+
     if (!workspace || !isMember) {
         return (
-            <div className="container mx-auto px-6 py-12 max-w-7xl min-h-[70vh] flex flex-col items-center justify-center text-center">
-                <h2 className="text-3xl font-bold mb-4 text-foreground">Access Denied</h2>
-                <p className="text-muted-foreground mb-8 max-w-md text-lg">You are not a member of this workspace or you do not have permission to view its projects.</p>
-                <Link href={`/workspaces`} className="bg-vertex-primary text-primary-foreground px-8 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity">
+            <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6">
+                <h2 className="text-2xl font-semibold mb-3 text-foreground">Access Denied</h2>
+                <p className="text-muted-foreground mb-6 max-w-sm">You are not a member of this workspace or don't have permission to view its projects.</p>
+                <Link href="/workspaces" className="bg-vertex-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
                     My Workspaces
                 </Link>
             </div>
@@ -86,93 +89,165 @@ export default function Page() {
 
     if (!project) {
         return (
-            <div className="container mx-auto px-6 py-12 max-w-7xl min-h-[70vh] flex flex-col items-center justify-center text-center">
-                <h2 className="text-3xl font-bold mb-4 text-foreground">Project Not Found</h2>
-                <p className="text-muted-foreground mb-8 max-w-md text-lg">The project you are looking for doesn't exist within this workspace.</p>
-                <Link href={`/workspaces/${workspaceSlug}`} className="bg-vertex-primary text-primary-foreground px-8 py-3 rounded-xl font-bold hover:opacity-90 transition-opacity">
+            <div className="min-h-[70vh] flex flex-col items-center justify-center text-center px-6">
+                <h2 className="text-2xl font-semibold mb-3 text-foreground">Project Not Found</h2>
+                <p className="text-muted-foreground mb-6 max-w-sm">The project you are looking for doesn't exist within this workspace.</p>
+                <Link href={`/workspaces/${workspaceSlug}`} className="bg-vertex-primary text-primary-foreground px-6 py-2.5 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity">
                     Back to Workspace
                 </Link>
             </div>
         )
     }
 
-    return(
-        <div className="container mx-auto px-6 py-12 max-w-7xl min-h-screen">
-            <motion.div
-                initial={{ opacity:0, x:-20 }}
-                animate={{ opacity:1, x:0 }}
-                className="mb-10"
-            >
-                <Link href={`/workspaces/${workspaceSlug}`} className="inline-flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-vertex-primary transition-colors group">
-                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+    const projectColor = project?.color || '#6366f1';
+
+    return (
+        <div className="container mx-auto px-6 py-10 max-w-7xl min-h-screen">
+
+            {/* Back link */}
+            <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} className="mb-6">
+                <Link href={`/workspaces/${workspaceSlug}`} className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-vertex-primary transition-colors group">
+                    <ArrowLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
                     Back to workspace
                 </Link>
             </motion.div>
 
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="bg-card border border-border/50 rounded-xl overflow-hidden shadow-sm backdrop-blur-xl"
-            >
-                {/* Top banner with project color */}
-                <div 
-                    className="h-3 w-full" 
-                    style={{ backgroundColor: project?.color || '#3b82f6' }} 
-                />
-                
-                <div className="p-8 md:p-10">
-                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
-                        <div>
-                            <div className="flex items-center gap-4 mb-4">
-                                <div 
-                                    className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-xl font-bold shadow-sm"
-                                    style={{ backgroundColor: project?.color || '#3b82f6' }}
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_260px] gap-5 items-start">
+
+                {/* Left column */}
+                <div className="flex flex-col gap-5">
+
+                    {/* Project header card */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.05 }}
+                        className="bg-card border border-border/50 rounded-xl overflow-hidden"
+                    >
+                        <div className="h-1 w-full" style={{ backgroundColor: projectColor }} />
+                        <div className="p-6">
+                            <div className="flex items-start gap-3 mb-5">
+                                <div
+                                    className="w-10 h-10 rounded-lg flex items-center justify-center text-white text-base font-semibold shrink-0"
+                                    style={{ backgroundColor: projectColor }}
                                 >
                                     {project?.title?.charAt(0).toUpperCase()}
                                 </div>
-                                <h1 className="text-3xl md:text-5xl font-extrabold tracking-tight text-foreground">
-                                    {project?.title}
-                                </h1>
-                            </div>
-                            <div className="flex flex-wrap items-center gap-4 text-sm text-muted-foreground mt-6">
-                                <div className="flex items-center gap-2 bg-secondary/50 px-3 py-1.5 rounded-full border border-border/50">
-                                    <div className="w-2 h-2 rounded-full" style={{ backgroundColor: project?.status === 'active' ? '#10b981' : '#f59e0b' }} />
-                                    <span className="capitalize font-medium text-foreground">{project?.status || 'Unknown'}</span>
-                                </div>
-                                
-                                {project?.deadline && (
-                                    <div className="flex items-center gap-1.5 text-rose-500 bg-rose-500/10 px-3 py-1.5 rounded-full border border-rose-500/20">
-                                        <Calendar className="w-4 h-4" />
-                                        <span className="font-medium flex items-center pt-px">Due: {project?.deadline}</span>
+                                <div>
+                                    <h1 className="text-xl font-semibold text-foreground mb-2">{project?.title}</h1>
+                                    <div className="flex flex-wrap items-center gap-2">
+                                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                                            {project?.status || 'unknown'}
+                                        </span>
+                                        {project?.deadline && (
+                                            <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-rose-500/10 text-rose-500 border border-rose-500/20">
+                                                <Calendar className="w-3 h-3" />
+                                                Due: {project.deadline}
+                                            </span>
+                                        )}
+                                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-full bg-secondary text-muted-foreground border border-border/50">
+                                            <Clock className="w-3 h-3" />
+                                            Created {project?.createdAt
+                                                ? new Date(project.createdAt.seconds ? project.createdAt.toDate() : project.createdAt).toLocaleDateString()
+                                                : 'recently'}
+                                        </span>
                                     </div>
-                                )}
-
-                                <div className="flex items-center gap-1.5 bg-secondary/30 px-3 py-1.5 rounded-full border border-border/50">
-                                    <Clock className="w-4 h-4 opacity-70" />
-                                    <span className="flex items-center pt-px">
-                                        Created {project?.createdAt ? new Date(project.createdAt.seconds ? project.createdAt.toDate() : project.createdAt).toLocaleDateString() : 'recently'}
-                                    </span>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
-                    <div className="max-w-none">
-                        <h3 className="text-xl font-semibold mb-4 flex items-center gap-2 text-foreground">
-                            <FileText className="w-5 h-5 text-vertex-primary" />
-                            Project Description
-                        </h3>
-                        <div className="bg-secondary/20 p-6 md:p-8 rounded-xl border border-border/50 text-muted-foreground leading-relaxed whitespace-pre-wrap">
-                            {project?.description ? (
-                                <p className="text-[1.05rem]">{project.description}</p>
-                            ) : (
-                                <p className="italic opacity-60">No description provided for this project.</p>
-                            )}
+                            <div className="border-t border-border/50 pt-5">
+                                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-2">Description</p>
+                                {project?.description ? (
+                                    <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-wrap">{project.description}</p>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground/50 italic">No description provided.</p>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    </motion.div>
+
+                    {/* Tasks card */}
+                    {!project.tasks.length && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 12 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="bg-card border border-border/50 rounded-xl overflow-hidden"
+                        >
+                            <div className="flex items-center justify-between px-6 py-4 border-b border-border/50">
+                                <div className="flex items-center gap-2">
+                                    <CheckSquare className="w-4 h-4 text-muted-foreground" />
+                                    <span className="text-sm font-medium text-foreground">Tasks</span>
+                                    <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground border border-border/50">0</span>
+                                </div>
+                                <CreateTaskDialog />
+                            </div>
+                            {!project.tasks.length && (
+                            <div className="flex flex-col items-center justify-center py-14 px-6 gap-2.5">
+                                <div className="w-9 h-9 rounded-lg border border-border/50 flex items-center justify-center">
+                                    <CheckSquare className="w-4 h-4 text-muted-foreground" />
+                                </div>
+                                <p className="text-sm font-medium text-foreground">No tasks yet</p>
+                                <p className="text-xs text-muted-foreground text-center max-w-50">Add your first task to start tracking progress on this project.</p>
+                            </div>
+                            )}
+                            {project.tasks.length && (
+                                <></>
+                            )}
+                        </motion.div>
+                    )}
+
                 </div>
-            </motion.div>
+
+                {/* Right sidebar */}
+                <div className="flex flex-col gap-4">
+
+                    {/* Details */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.15 }}
+                        className="bg-card border border-border/50 rounded-xl p-5"
+                    >
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Details</p>
+                        <div className="flex flex-col gap-2.5 text-sm">
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground flex items-center gap-2"><Circle className={`${statusStyles[project?.status]}`} size={16} />Status</span>
+                                <span className="font-medium text-foreground capitalize">{project?.status || '—'}</span>
+                            </div>
+                            <div className="h-px bg-border/50" />
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground flex items-center gap-2"><Calendar className="w-4 h-4" />Deadline</span>
+                                <span className="text-foreground">{project?.deadline || '—'}</span>
+                            </div>
+                            <div className="h-px bg-border/50" />
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground flex items-center gap-2"><CheckSquare className="w-4 h-4" />Tasks</span>
+                                <span className="text-foreground">0 total</span>
+                            </div>
+                        </div>
+                    </motion.div>
+
+                    {/* Progress */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 12 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.2 }}
+                        className="bg-card border border-border/50 rounded-xl p-5"
+                    >
+                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">Progress</p>
+                        <div className="flex justify-between items-center mb-2">
+                            <span className="text-sm text-muted-foreground">Completion</span>
+                            <span className="text-sm font-medium text-foreground">0%</span>
+                        </div>
+                        <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+                            <div className="h-full w-0 rounded-full transition-all" style={{ backgroundColor: projectColor }} />
+                        </div>
+                    </motion.div>
+
+                </div>
+            </div>
         </div>
-    )       
+    )
 }

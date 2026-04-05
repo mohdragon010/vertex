@@ -10,6 +10,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useRouter } from "next/navigation"
 import Link from "next/link";
+import Image from "next/image"
 import WorkspaceMembersAvatars from "@/components/workspaceMembersAvatars";
 
 export default function Workspaces() {
@@ -209,11 +210,13 @@ export default function Workspaces() {
                                         <CardHeader className="p-8">
                                             <div className="flex justify-between items-start mb-6">
                                                 {workspace.imageURL ? (
-                                                    <div className="w-16 h-16 rounded-2xl overflow-hidden border-2 border-border/50 group-hover:border-vertex-primary transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3 shadow-md">
-                                                        <img 
+                                                    <div className="relative w-16 h-16 rounded-2xl overflow-hidden border-2 border-border/50 group-hover:border-vertex-primary transition-all duration-500 transform group-hover:scale-110 group-hover:rotate-3 shadow-md">
+                                                        <Image
+                                                            fill
+                                                            sizes="144px"
                                                             src={workspace.imageURL} 
                                                             alt={workspace.name} 
-                                                            className="w-full h-full object-cover"
+                                                            className="object-cover"
                                                         />
                                                     </div>
                                                 ) : (
