@@ -195,7 +195,7 @@ export default function Page() {
                                     <span className="text-sm font-medium text-foreground">Tasks</span>
                                     <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground border border-border/50">0</span>
                                 </div>
-                                <CreateTaskDialog />
+                                <CreateTaskDialog project={project}/>
                             </div>
                             {!project.tasks.length && (
                             <div className="flex flex-col items-center justify-center py-14 px-6 gap-2.5">
