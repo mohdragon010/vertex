@@ -50,7 +50,7 @@ export default function UpcomingDeadlines({ tasks }) {
                         return (
                             <li key={`${task.projectId}-${task.id}`}>
                                 <Link
-                                    href={`/workspaces/${task.workspaceSlug}/${task.projectId}`}
+                                    href={`/workspaces/${task.workspaceSlug}/${task.projectId}/${task.id}`}
                                     className="flex items-center gap-3 px-5 py-3 hover:bg-secondary/50 transition-colors"
                                 >
                                     <div

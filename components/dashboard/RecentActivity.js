@@ -57,7 +57,7 @@ export default function RecentActivity({ tasks }) {
                         return (
                             <li key={`${task.projectId}-${task.id}`}>
                                 <Link
-                                    href={`/workspaces/${task.workspaceSlug}/${task.projectId}`}
+                                    href={`/workspaces/${task.workspaceSlug}/${task.projectId}/${task.id}`}
                                     className="flex items-start gap-3 px-5 py-3 hover:bg-secondary/50 transition-colors"
                                 >
                                     <Icon className={`w-4 h-4 mt-0.5 shrink-0 ${meta.className}`} />

@@ -3,29 +3,33 @@
 import { Clock, MoreHorizontal, MessageSquare, Paperclip, CheckCircle2, Circle, PlayCircle, Pencil, Trash2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "./ui/dropdown-menu";
 import { useState } from "react";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
-const EditTaskDialog   = dynamic(() => import("@/components/editTaskDialog"),   { ssr: false });
+const EditTaskDialog = dynamic(() => import("@/components/editTaskDialog"), { ssr: false });
 const DeleteTaskDialog = dynamic(() => import("@/components/deleteTaskDialog"), { ssr: false });
 
 export default function TaskCard({ task, project }) {
-    const [editOpen,   setEditOpen]   = useState(false);
+    const { workspaceSlug } = useParams();
+    const [editOpen, setEditOpen] = useState(false);
     const [deleteOpen, setDeleteOpen] = useState(false);
+    const taskHref = `/workspaces/${workspaceSlug}/${project.id}/${task.id}`;
 
     const priorityConfig = {
-        low:    { cls: "bg-blue-500/10 text-blue-500 border-blue-500/20",    dot: "bg-blue-500" },
+        low: { cls: "bg-blue-500/10 text-blue-500 border-blue-500/20", dot: "bg-blue-500" },
         medium: { cls: "bg-amber-500/10 text-amber-500 border-amber-500/20", dot: "bg-amber-500" },
-        high:   { cls: "bg-rose-500/10 text-rose-500 border-rose-500/20",    dot: "bg-rose-500" },
+        high: { cls: "bg-rose-500/10 text-rose-500 border-rose-500/20", dot: "bg-rose-500" },
     };
 
     const statusConfig = {
-        todo:          { icon: <Circle className="w-4 h-4 text-muted-foreground" />,  label: "To Do" },
-        "in-progress": { icon: <PlayCircle className="w-4 h-4 text-amber-500" />,     label: "In Progress" },
-        done:          { icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />, label: "Done" },
+        todo: { icon: <Circle className="w-4 h-4 text-muted-foreground" />, label: "To Do" },
+        "in-progress": { icon: <PlayCircle className="w-4 h-4 text-amber-500" />, label: "In Progress" },
+        done: { icon: <CheckCircle2 className="w-4 h-4 text-emerald-500" />, label: "Done" },
     };
 
     const priority = priorityConfig[task.priority] || priorityConfig.low;
-    const status   = statusConfig[task.status]     || statusConfig.todo;
-    const isDone   = task.status === "done";
+    const status = statusConfig[task.status] || statusConfig.todo;
+    const isDone = task.status === "done";
     const isOverdue = task.deadline && new Date(task.deadline) < new Date() && !isDone;
 
     return (
@@ -42,10 +46,13 @@ export default function TaskCard({ task, project }) {
                             {status.icon}
                         </button>
                         <div className="min-w-0">
-                            <h3 className={`text-sm font-medium leading-snug line-clamp-1 transition-colors
-                                ${isDone ? "line-through text-muted-foreground" : "text-foreground group-hover:text-vertex-primary"}`}>
+                            <Link
+                                href={taskHref}
+                                className={`text-sm font-medium leading-snug line-clamp-1 transition-colors block hover:underline underline-offset-2
+                                    ${isDone ? "line-through text-muted-foreground" : "text-foreground group-hover:text-vertex-primary"}`}
+                            >
                                 {task.title}
-                            </h3>
+                            </Link>
                             {task.description && (
                                 <p className="text-xs text-muted-foreground line-clamp-2 mt-1 leading-relaxed">
                                     {task.description}
@@ -111,7 +118,7 @@ export default function TaskCard({ task, project }) {
                 </div>
             </div>
 
-            <EditTaskDialog   task={task} project={project} open={editOpen}   onOpenChange={setEditOpen} />
+            <EditTaskDialog task={task} project={project} open={editOpen} onOpenChange={setEditOpen} />
             <DeleteTaskDialog task={task} project={project} open={deleteOpen} onOpenChange={setDeleteOpen} />
         </>
     );
