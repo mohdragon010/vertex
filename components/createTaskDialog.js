@@ -1,6 +1,6 @@
 "use client";
 
-import { Plus } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "./ui/dialog";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -16,18 +16,29 @@ import { useParams } from "next/navigation";
 
 
 export default function CreateTaskDialog({ project }) {
-    const user = useAuth()
+    const { user } = useAuth()
     const { workspaceSlug, projectId } = useParams();
-    const [emails, setEmails] = useState([]);
-    const [formData, setFormData] = useState({
+    const [members, setMembers] = useState([]);
+    const [isOpen, setIsOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState("");
+
+    const initialFormData = {
         title: "",
         description: "",
-        status: "todo", // todo, in-progress, done
-        priority: "low", // low, medium, high,
+        status: "todo",
+        priority: "low",
         assignedTo: user?.uid || "",
         tags: [],
         deadline: "",
-    }) 
+    };
+    const [formData, setFormData] = useState(initialFormData);
+
+    useEffect(() => {
+        if (user?.uid && !formData.assignedTo) {
+            setFormData(prev => ({ ...prev, assignedTo: user.uid }));
+        }
+    }, [user]);
     
     const getMembers = async () => {
         try {
@@ -51,7 +62,7 @@ export default function CreateTaskDialog({ project }) {
         return result
     }
 
-    const getMembersEmails = async () => {
+    const getMembersData = async () => {
         try {
             const usersId = await getMembers()
             if (!usersId.length) return []
@@ -59,48 +70,55 @@ export default function CreateTaskDialog({ project }) {
             const chunks = chunkArray(usersId, 10)
             const collectionRef = collection(db, "users")
 
-            let emails = []
+            let membersData = []
 
             for (const chunk of chunks) {
                 const q = query(collectionRef, where(documentId(), "in", chunk))
                 const snap = await getDocs(q)
 
                 snap.docs.forEach(doc => {
-                    emails.push(doc.data().email || "")
+                    membersData.push({
+                        id: doc.id,
+                        email: doc.data().email || ""
+                    })
                 })
             }
 
-            return emails
+            return membersData
         } catch (err) {
-            console.log(err)
+            console.error(err)
             return []
         }
     }
 
     const createNewTask = async (e) => {
         e.preventDefault();
+        setError("");
+        setIsLoading(true);
         try {
             const workspaceQuery = query(collection(db, "workspaces"), where("slug", "==", workspaceSlug));
             const workspaceSnap = await getDocs(workspaceQuery);
             
             if (workspaceSnap.empty) {
-                console.error("Workspace not found");
-                return;
+                throw new Error("Workspace not found");
             }
 
             const workspaceDoc = workspaceSnap.docs[0];
             const workspaceData = workspaceDoc.data();
             const workspaceRef = doc(db, "workspaces", workspaceDoc.id);
 
+            let projectFound = false;
             const updatedProjects = workspaceData.projects.map((proj) => {
                 if (proj.id === projectId) {
+                    projectFound = true;
                     const newTask = {
                         ...formData,
+                        tags: formData.tags.filter(t => t.trim() !== ""),
                         id: v4(),
                         createdAt: new Date().toISOString(),
                         updatedAt: new Date().toISOString(),
                         createdBy: user?.uid || "unknown",
-                        order: (proj.tasks || []).length
+                        order: (proj.tasks || []).length,
                     };
                     
                     return {
@@ -111,23 +129,32 @@ export default function CreateTaskDialog({ project }) {
                 return proj;
             });
 
+            if (!projectFound) {
+                throw new Error("Project not found");
+            }
+
             await updateDoc(workspaceRef, {
                 projects: updatedProjects
             });
 
             console.log("Task created successfully!");
+            setIsOpen(false);
+            setFormData(initialFormData);
             
         } catch (err) {
             console.error("Error creating task:", err);
+            setError(err.message || "Failed to create task");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     useEffect(() => {
-        getMembersEmails().then(setEmails);
+        getMembersData().then(setMembers);
     }, [workspaceSlug]);
 
     return(
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
                 <button className="inline-flex items-center gap-1.5 text-sm px-3 py-1.5 rounded-lg border border-border/50 text-foreground hover:bg-secondary transition-colors">
                     <Plus className="w-3.5 h-3.5" />
@@ -147,6 +174,11 @@ export default function CreateTaskDialog({ project }) {
 
 
                 <form onSubmit={createNewTask} className="space-y-4 pt-4">
+                    {error && (
+                        <div className="bg-destructive/15 text-destructive text-sm p-3 rounded-md">
+                            {error}
+                        </div>
+                    )}
                     <div className="space-y-2">
                         <Label htmlFor="title">Task Title</Label>
                         <Input 
@@ -222,14 +254,14 @@ export default function CreateTaskDialog({ project }) {
                                     <SelectValue placeholder="Select User" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {emails.length === 0 && (
+                                    {members.length === 0 && (
                                         <SelectItem value="loading" disabled>
                                             Loading...
                                         </SelectItem>
                                     )}
-                                    {emails.map((email) => (
-                                        <SelectItem key={email} value={email}>
-                                            {email}
+                                    {members.map((member) => (
+                                        <SelectItem key={member.id} value={member.id}>
+                                            {member.email}
                                         </SelectItem>
                                     ))}
                                 </SelectContent>
@@ -247,7 +279,12 @@ export default function CreateTaskDialog({ project }) {
                     </div>
                     
                     <div className="flex justify-end pt-4">
-                        <button type="submit" className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium text-sm transition-colors">
+                        <button 
+                            type="submit" 
+                            disabled={isLoading}
+                            className="bg-primary text-primary-foreground hover:bg-primary/90 px-4 py-2 rounded-md font-medium text-sm transition-colors inline-flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {isLoading && <Loader2 className="w-4 h-4 animate-spin" />}
                             Create Task
                         </button>
                     </div>
