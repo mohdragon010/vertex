@@ -7,6 +7,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import Link from "next/link";
 import useAuth from "@/hooks/useAuth";
 import ThemeToggle from "./ThemeToggle";
+import NotificationBell from "./notifications/NotificationBell";
 
 export default function Navbar() {
     const pathname = usePathname()
@@ -67,7 +68,7 @@ export default function Navbar() {
                                         <BreadcrumbLink
                                             href={`/${pathArr.slice(0, index + 1).join("/")}`}
                                             className="capitalize text-sm font-medium transition-colors hover:text-vertex-primary"
-                                            >
+                                        >
                                             {item.replace(/-/g, ' ')}
                                         </BreadcrumbLink>
                                     </BreadcrumbItem>
@@ -109,6 +110,7 @@ export default function Navbar() {
 
                     {/* Action Icons */}
                     <div className="flex items-center gap-1">
+                        <NotificationBell />
                         <ThemeToggle />
 
                         <Link href="/settings">
@@ -137,6 +139,7 @@ export default function Navbar() {
 
                 {/* Mobile Menu Toggle */}
                 <div className="flex md:hidden ml-auto items-center gap-2">
+                    <NotificationBell />
                     <ThemeToggle />
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -170,8 +173,8 @@ export default function Navbar() {
                                         <Link
                                             href={route.href}
                                             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all active:scale-[0.98] ${isActive
-                                                    ? "bg-vertex-primary text-white font-semibold shadow-md shadow-vertex-primary/20"
-                                                    : "hover:bg-accent text-muted-foreground"
+                                                ? "bg-vertex-primary text-white font-semibold shadow-md shadow-vertex-primary/20"
+                                                : "hover:bg-accent text-muted-foreground"
                                                 }`}
                                         >
                                             <span className="text-lg">{route.name}</span>
