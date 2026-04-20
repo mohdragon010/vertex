@@ -44,7 +44,7 @@ export default function NotificationBell() {
             >
                 <Bell size={20} strokeWidth={2.2} />
                 {unreadCount > 0 && (
-                    <span className="absolute top-1 right-1 min-w-[16px] h-[16px] px-1 rounded-full bg-vertex-primary text-white text-[10px] font-semibold flex items-center justify-center border-2 border-background">
+                    <span className="absolute top-1 right-1 min-w-46px] px-1 rounded-full bg-vertex-primary text-white text-[10px] font-semibold flex items-center justify-center border-2 border-background">
                         {unreadCount > 9 ? "9+" : unreadCount}
                     </span>
                 )}
@@ -58,7 +58,7 @@ export default function NotificationBell() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -6 }}
                         transition={{ duration: 0.15 }}
-                        className="absolute right-0 mt-2 w-[360px] max-w-[calc(100vw-2rem)] bg-popover border border-border/60 rounded-xl shadow-lg overflow-hidden z-50"
+                        className="absolute right-0 mt-2 w-90 max-w-[calc(100vw-2rem)] bg-popover border border-border/60 rounded-xl shadow-lg overflow-hidden z-50"
                     >
                         <div className="flex items-center justify-between px-4 py-3 border-b border-border/50">
                             <div className="flex items-center gap-2">
@@ -80,7 +80,7 @@ export default function NotificationBell() {
                             )}
                         </div>
 
-                        <div className="max-h-[420px] overflow-y-auto divide-y divide-border/40">
+                        <div className="max-h-105 overflow-y-auto divide-y divide-border/40">
                             {loading ? (
                                 <div className="px-4 py-10 text-center text-sm text-muted-foreground">
                                     Loading...

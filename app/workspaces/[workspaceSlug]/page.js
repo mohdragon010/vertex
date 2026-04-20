@@ -6,7 +6,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore"
 import { useParams, useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
 import { motion } from "framer-motion"
-import { Layout, Grid, Users, Calendar, ArrowLeft, Plus, Sparkles, MoreVertical, Edit, Trash2, Settings } from "lucide-react"
+import { Layout, Grid, Users, Calendar, ArrowLeft, Plus, Sparkles, MoreVertical, Edit, Trash2, Settings, MessageSquare } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
 import { Skeleton } from "@/components/ui/skeleton"
@@ -31,7 +31,7 @@ export default function WorkspacePage() {
     const [editProjectDialogOpen, setEditProjectDialogOpen] = useState(false);
     const [deleteProjectDialogOpen, setDeleteProjectDialogOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState(null);
-    
+
     const handleEditProject = (e, project) => {
         e.preventDefault();
         e.stopPropagation();
@@ -45,7 +45,7 @@ export default function WorkspacePage() {
         setSelectedProject(project);
         setDeleteProjectDialogOpen(true);
     }
-    
+
     useEffect(() => {
         if (authLoading) return
         if (!user?.uid) { router.push("/login"); return }
@@ -184,6 +184,12 @@ export default function WorkspacePage() {
                         transition={{ delay: 0.3 }}
                         className="shrink-0 flex items-center gap-4"
                     >
+                        <Link href={`/workspaces/${workspace.slug}/chat`}>
+                            <Button variant="outline" className="rounded-2xl h-14 px-6 font-black text-lg border-2 hover:bg-muted/50 transition-all active:scale-95 group" title="Team Chat">
+                                <MessageSquare className="mr-2 h-6 w-6 group-hover:scale-110 transition-transform duration-300 text-vertex-primary" />
+                                Team Chat
+                            </Button>
+                        </Link>
                         {workspace.adminId === user?.uid && (
                             <>
                                 <Link href={`/workspaces/${workspace.slug}/settings`}>
@@ -251,14 +257,14 @@ export default function WorkspacePage() {
                                                         </Button>
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end" className="rounded-2xl border-border bg-card/95 backdrop-blur-md p-2 min-w-40 shadow-2xl">
-                                                        <DropdownMenuItem 
+                                                        <DropdownMenuItem
                                                             className="rounded-xl flex items-center gap-3 p-3 focus:bg-vertex-primary/10 focus:text-vertex-primary cursor-pointer font-bold"
                                                             onClick={(e) => handleEditProject(e, project)}
                                                         >
                                                             <Edit className="w-4 h-4" />
                                                             Edit Project
                                                         </DropdownMenuItem>
-                                                        <DropdownMenuItem 
+                                                        <DropdownMenuItem
                                                             className="rounded-xl flex items-center gap-3 p-3 focus:bg-destructive/10 focus:text-destructive cursor-pointer font-bold"
                                                             onClick={(e) => handleDeleteProject(e, project)}
                                                         >
@@ -270,15 +276,15 @@ export default function WorkspacePage() {
                                             </div>
 
                                             <div className="flex justify-between items-start mb-6 pr-10">
-                                                <div 
+                                                <div
                                                     className="p-4 rounded-2xl transition-all duration-500 group-hover/proj:scale-110 group-hover/proj:rotate-3"
                                                     style={{ backgroundColor: `${project.color}20`, color: project.color }}
                                                 >
                                                     <Grid className="w-7 h-7" />
                                                 </div>
-                                                <div 
+                                                <div
                                                     className="text-[10px] font-black uppercase px-3 py-1.5 rounded-full border"
-                                                    style={{ 
+                                                    style={{
                                                         backgroundColor: project.status === 'active' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(107, 114, 128, 0.1)',
                                                         color: project.status === 'active' ? '#10B981' : '#6B7280',
                                                         borderColor: project.status === 'active' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(107, 114, 128, 0.2)'
@@ -293,7 +299,7 @@ export default function WorkspacePage() {
                                             <p className="text-muted-foreground text-sm line-clamp-2 leading-relaxed mb-6">
                                                 {project.description || "No description provided for this project."}
                                             </p>
-                                            
+
                                             <div className="mt-auto flex items-center justify-between text-[10px] font-black uppercase tracking-widest text-muted-foreground/60">
                                                 <span>{project.tasks?.length || 0} Tasks</span>
                                                 {project.deadline && (
@@ -311,9 +317,9 @@ export default function WorkspacePage() {
                     )}
                 </section>
             </div>
-            <CreateProjectDialog 
-                open={createProjectDialogOpen} 
-                setOpen={setCreateProjectDialogOpen} 
+            <CreateProjectDialog
+                open={createProjectDialogOpen}
+                setOpen={setCreateProjectDialogOpen}
                 workspaceId={workspace.id}
             />
             <EditProjectDialog

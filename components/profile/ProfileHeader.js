@@ -19,7 +19,7 @@ export default function ProfileHeader({ userDoc, user, isOwnProfile, onEdit }) {
 
     return (
         <div className="bg-card border border-border/50 rounded-xl overflow-hidden">
-            <div className="h-20 bg-gradient-to-r from-vertex-primary/10 via-secondary to-secondary/40" />
+            <div className="h-20 bg-linear-to-r from-vertex-primary/10 via-secondary to-secondary/40" />
             <div className="px-6 pb-6 -mt-12">
                 <div className="flex items-end justify-between gap-4 mb-5">
                     <div className="w-24 h-24 rounded-2xl border-4 border-card bg-vertex-primary/10 text-vertex-primary flex items-center justify-center text-3xl font-semibold overflow-hidden">
