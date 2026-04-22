@@ -4,7 +4,7 @@
 
 Workspaces, projects, tasks, real-time team chat, and smart notifications — in one fast, clean app.
 
-[Live demo](https://vertex-app.vercel.app) · [Report issue](https://github.com/mohamedayman/vertex/issues)
+[Live demo](https://vertex-team.vercel.app)
 
 ![Next.js](https://img.shields.io/badge/Next.js-16-black?style=flat-square&logo=next.js)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react&logoColor=white)
@@ -53,7 +53,7 @@ Vertex is a modern team collaboration platform that brings workspaces, projects,
 ### 1. Clone and install
 
 ```bash
-git clone https://github.com/mohamedayman/vertex.git
+git clone https://github.com/mohdragon010/vertex.git
 cd vertex
 npm install
 ```
